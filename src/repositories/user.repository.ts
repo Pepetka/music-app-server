@@ -26,8 +26,10 @@ class UserRepository implements IUserRepository {
       }
 
       return newUser.rows[0];
-    } catch (err: any) {
-      throw new Error(`Failed to create User! Msg: ${err.message}`);
+    } catch (error: unknown) {
+      throw new Error(
+        `Failed to create User! Msg: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -39,8 +41,8 @@ class UserRepository implements IUserRepository {
       );
 
       return user?.rows[0] ? user.rows[0] : null;
-    } catch (err: any) {
-      throw new Error(`Failed to get User! Msg: ${err.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to get User! Msg: ${(error as Error).message}`);
     }
   }
 
@@ -52,8 +54,10 @@ class UserRepository implements IUserRepository {
       );
 
       return user?.rows[0] ? user.rows[0] : null;
-    } catch (err: any) {
-      throw new Error(`Failed to get User by email! Msg: ${err.message}`);
+    } catch (error: unknown) {
+      throw new Error(
+        `Failed to get User by email! Msg: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -72,8 +76,10 @@ class UserRepository implements IUserRepository {
       }
 
       return affectedUsers.rows[0];
-    } catch (err: any) {
-      throw new Error(`Failed to update User! Msg: ${err.message}`);
+    } catch (error: unknown) {
+      throw new Error(
+        `Failed to update User! Msg: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -85,8 +91,10 @@ class UserRepository implements IUserRepository {
       );
 
       return deletedUser?.rows[0] ? deletedUser.rows[0] : null;
-    } catch (err: any) {
-      throw new Error(`Failed to delete User! Msg: ${err.message}`);
+    } catch (error: unknown) {
+      throw new Error(
+        `Failed to delete User! Msg: ${(error as Error).message}`,
+      );
     }
   }
 }

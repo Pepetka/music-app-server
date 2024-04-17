@@ -18,8 +18,8 @@ class UserRoutes {
         const newUser = await UserController.createUser(req.body);
 
         return res.status(201).json(newUser);
-      } catch (error: any) {
-        return res.status(500).json({ message: error.message });
+      } catch (error: unknown) {
+        return res.status(500).json({ message: (error as Error).message });
       }
     });
 
@@ -37,8 +37,8 @@ class UserRoutes {
         }
 
         return res.status(200).json(newUser);
-      } catch (error: any) {
-        return res.status(500).json({ message: error.message });
+      } catch (error: unknown) {
+        return res.status(500).json({ message: (error as Error).message });
       }
     });
 
@@ -56,8 +56,8 @@ class UserRoutes {
         }
 
         return res.status(200).json(newUser);
-      } catch (error: any) {
-        return res.status(500).json({ message: error.message });
+      } catch (error: unknown) {
+        return res.status(500).json({ message: (error as Error).message });
       }
     });
 
@@ -79,8 +79,8 @@ class UserRoutes {
         }
 
         return res.status(204);
-      } catch (error: any) {
-        return res.status(500).json({ message: error.message });
+      } catch (error: unknown) {
+        return res.status(500).json({ message: (error as Error).message });
       }
     });
 
@@ -98,8 +98,8 @@ class UserRoutes {
         }
 
         return res.status(204);
-      } catch (error: any) {
-        return res.status(500).json({ message: error.message });
+      } catch (error: unknown) {
+        return res.status(500).json({ message: (error as Error).message });
       }
     });
   }
