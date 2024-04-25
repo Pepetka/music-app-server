@@ -3,9 +3,9 @@ import type { UserModel, UserCreationParams } from "../models/user.model";
 import db from "../database/database";
 
 interface IUserRepository {
+  createUser(user: Omit<UserModel, "id">): Promise<UserModel | null>;
   getUser(id: string): Promise<UserModel | null>;
   getUserByEmail(email: string): Promise<UserModel | null>;
-  createUser(user: Omit<UserModel, "id">): Promise<UserModel>;
   updateUser(
     id: string,
     user: Omit<UserModel, "id">,
@@ -14,18 +14,14 @@ interface IUserRepository {
 }
 
 class UserRepository implements IUserRepository {
-  async createUser(user: UserCreationParams): Promise<UserModel> {
+  async createUser(user: UserCreationParams): Promise<UserModel | null> {
     try {
       const newUser: QueryResult<UserModel> | undefined = await db?.query(
         "INSERT INTO users (username, password, email) VALUES ($1, $2, $3) RETURNING *",
         [user.username, user.password, user.email],
       );
 
-      if (!newUser?.rows[0]) {
-        throw new Error("Empty result");
-      }
-
-      return newUser.rows[0];
+      return newUser?.rows[0] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to create User! Msg: ${(error as Error).message}`,
@@ -40,7 +36,7 @@ class UserRepository implements IUserRepository {
         [id],
       );
 
-      return user?.rows[0] ? user.rows[0] : null;
+      return user?.rows[0] ?? null;
     } catch (error: unknown) {
       throw new Error(`Failed to get User! Msg: ${(error as Error).message}`);
     }
@@ -53,7 +49,7 @@ class UserRepository implements IUserRepository {
         [email],
       );
 
-      return user?.rows[0] ? user.rows[0] : null;
+      return user?.rows[0] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to get User by email! Msg: ${(error as Error).message}`,
@@ -71,11 +67,7 @@ class UserRepository implements IUserRepository {
         [user.username, user.password, user.email, id],
       );
 
-      if (!affectedUsers?.rows[0]) {
-        throw new Error("Empty result");
-      }
-
-      return affectedUsers.rows[0];
+      return affectedUsers?.rows[0] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to update User! Msg: ${(error as Error).message}`,
@@ -90,7 +82,7 @@ class UserRepository implements IUserRepository {
         [id],
       );
 
-      return deletedUser?.rows[0] ? deletedUser.rows[0] : null;
+      return deletedUser?.rows[0] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to delete User! Msg: ${(error as Error).message}`,

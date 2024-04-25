@@ -15,6 +15,7 @@ import {
 } from "tsoa";
 import UserRepository from "../repositories/user.repository";
 import type { UserModel, UserCreationParams } from "../models/user.model";
+import { ResponseError } from "../errors/response.error";
 
 @Tags("User")
 @Route("user")
@@ -24,7 +25,8 @@ export class UserController extends Controller {
    * @param userData The user to create.
    */
   @Post("create")
-  @Response<{ message: "Server Error" }>(500, "Server Error")
+  @Response<{ message: "Internal server error" }>(500, "Internal server error")
+  @Response<{ message: "Body is required" }>(400, "Body is required")
   @SuccessResponse("201", "Created")
   @Example({
     user: {
@@ -37,10 +39,14 @@ export class UserController extends Controller {
   public static async createUser(
     @Body() userData: UserCreationParams,
   ): Promise<{ user: UserModel }> {
-    const newUser = await UserRepository.createUser(userData);
+    const user = await UserRepository.createUser(userData);
+
+    if (!user) {
+      throw new ResponseError("User not created", 500);
+    }
 
     return {
-      user: newUser,
+      user,
     };
   }
   /**
@@ -48,8 +54,9 @@ export class UserController extends Controller {
    * @param id The id of the user to get.
    */
   @Get("/get/{id}")
-  @Response<{ message: "Server Error" }>(500, "Server Error")
+  @Response<{ message: "Internal server error" }>(500, "Internal server error")
   @Response<{ message: "Not Found" }>(404, "Not Found")
+  @Response<{ message: "Id is required" }>(400, "Id is required")
   @Example({
     user: {
       userId: "<USER_ID>",
@@ -61,10 +68,14 @@ export class UserController extends Controller {
   public static async getUser(
     @Path() id: string,
   ): Promise<{ user: UserModel | null }> {
-    const newUser = await UserRepository.getUser(id);
+    const user = await UserRepository.getUser(id);
+
+    if (!user) {
+      throw new ResponseError("User not found", 404);
+    }
 
     return {
-      user: newUser,
+      user,
     };
   }
   /**
@@ -72,8 +83,9 @@ export class UserController extends Controller {
    * @param email The email of the user to get.
    */
   @Get("/get")
-  @Response<{ message: "Server Error" }>(500, "Server Error")
+  @Response<{ message: "Internal server error" }>(500, "Internal server error")
   @Response<{ message: "Not Found" }>(404, "Not Found")
+  @Response<{ message: "Email is required" }>(400, "Email is required")
   @Example({
     user: {
       userId: "<USER_ID>",
@@ -85,10 +97,14 @@ export class UserController extends Controller {
   public static async getUserByEmail(
     @Query() email: string,
   ): Promise<{ user: UserModel | null }> {
-    const newUser = await UserRepository.getUserByEmail(email);
+    const user = await UserRepository.getUserByEmail(email);
+
+    if (!user) {
+      throw new ResponseError("User not found", 404);
+    }
 
     return {
-      user: newUser,
+      user,
     };
   }
   /**
@@ -97,50 +113,37 @@ export class UserController extends Controller {
    * @param userData The user to update.
    */
   @Put("/update/{id}")
-  @Response<{ message: "Server Error" }>(500, "Server Error")
+  @Response<{ message: "Internal server error" }>(500, "Internal server error")
   @Response<{ message: "Not Found" }>(404, "Not Found")
+  @Response<{ message: "Id and Body are required" }>(
+    400,
+    "Id and Body are required",
+  )
   @SuccessResponse(204, "Updated")
-  @Example({
-    user: {
-      userId: "<USER_ID>",
-      username: "<USERNAME>",
-      password: "<PASSWORD>",
-      email: "<EMAIL>",
-    },
-  })
   public static async updateUser(
     @Path() id: string,
     @Body() userData: UserCreationParams,
-  ): Promise<{ user: UserModel | null }> {
-    const newUser = await UserRepository.updateUser(id, userData);
+  ): Promise<void> {
+    const user = await UserRepository.updateUser(id, userData);
 
-    return {
-      user: newUser,
-    };
+    if (!user) {
+      throw new ResponseError("User not found", 404);
+    }
   }
   /**
    * Delete a user.
    * @param id The id of the user to delete.
    */
   @Delete("/delete/{id}")
-  @Response<{ message: "Server Error" }>(500, "Server Error")
+  @Response<{ message: "Internal server error" }>(500, "Internal server error")
   @Response<{ message: "Not Found" }>(404, "Not Found")
-  @SuccessResponse(204, "Updated")
-  @Example({
-    user: {
-      userId: "<USER_ID>",
-      username: "<USERNAME>",
-      password: "<PASSWORD>",
-      email: "<EMAIL>",
-    },
-  })
-  public static async deleteUser(
-    @Path() id: string,
-  ): Promise<{ user: UserModel | null }> {
-    const newUser = await UserRepository.deleteUser(id);
+  @Response<{ message: "Id is required" }>(400, "Id is required")
+  @SuccessResponse(204, "Deleted")
+  public static async deleteUser(@Path() id: string): Promise<void> {
+    const user = await UserRepository.deleteUser(id);
 
-    return {
-      user: newUser,
-    };
+    if (!user) {
+      throw new ResponseError("User not found", 404);
+    }
   }
 }
