@@ -2,17 +2,21 @@ import { Pool } from "pg";
 import { config } from "./database.config";
 
 class Database {
-  public pool: Pool | undefined;
+  public pool: Pool;
 
   constructor() {
-    this.init();
-  }
-
-  private async connectToDatabase() {
     this.pool = new Pool({
       ...config,
     });
+    this.init();
+  }
 
+  private async init() {
+    await this.connectToDatabase();
+    await this.createTable();
+  }
+
+  private async connectToDatabase() {
     await this.pool
       .connect()
       .then(() => {
@@ -33,12 +37,7 @@ class Database {
       PRIMARY KEY ("id")
     );`;
 
-    this.pool?.query(createCommand);
-  }
-
-  private async init() {
-    await this.connectToDatabase();
-    await this.createTable();
+    await this.pool.query(createCommand);
   }
 }
 

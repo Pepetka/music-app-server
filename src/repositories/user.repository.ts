@@ -16,7 +16,7 @@ interface IUserRepository {
 class UserRepository implements IUserRepository {
   async createUser(user: UserCreationParams): Promise<UserModel | null> {
     try {
-      const newUser: QueryResult<UserModel> | undefined = await db?.query(
+      const newUser: QueryResult<UserModel> | undefined = await db.query(
         "INSERT INTO users (username, password, email) VALUES ($1, $2, $3) RETURNING *",
         [user.username, user.password, user.email],
       );
@@ -31,7 +31,7 @@ class UserRepository implements IUserRepository {
 
   async getUser(id: string): Promise<UserModel | null> {
     try {
-      const user: QueryResult<UserModel> | undefined = await db?.query(
+      const user: QueryResult<UserModel> | undefined = await db.query(
         "SELECT * FROM users WHERE id = $1",
         [id],
       );
@@ -44,7 +44,7 @@ class UserRepository implements IUserRepository {
 
   async getUserByEmail(email: string): Promise<UserModel | null> {
     try {
-      const user: QueryResult<UserModel> | undefined = await db?.query(
+      const user: QueryResult<UserModel> | undefined = await db.query(
         "SELECT * FROM users WHERE email = $1",
         [email],
       );
@@ -62,7 +62,7 @@ class UserRepository implements IUserRepository {
     user: UserCreationParams,
   ): Promise<UserModel | null> {
     try {
-      const affectedUsers: QueryResult<UserModel> | undefined = await db?.query(
+      const affectedUsers: QueryResult<UserModel> | undefined = await db.query(
         "UPDATE users SET username = $1, password = $2, email = $3 WHERE id = $4 RETURNING *",
         [user.username, user.password, user.email, id],
       );
@@ -77,7 +77,7 @@ class UserRepository implements IUserRepository {
 
   async deleteUser(id: string): Promise<UserModel | null> {
     try {
-      const deletedUser: QueryResult<UserModel> | undefined = await db?.query(
+      const deletedUser: QueryResult<UserModel> | undefined = await db.query(
         "DELETE FROM users WHERE id = $1 RETURNING *",
         [id],
       );
