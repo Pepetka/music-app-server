@@ -1,11 +1,12 @@
 import type { QueryResult } from "pg";
 import type { UserModel, UserCreationParams } from "../models/user.model";
 import db from "../database/database";
+import { ZERO } from "../utils/constants";
 
 interface IUserRepository {
+  createUser(user: Omit<UserModel, "id">): Promise<UserModel | null>;
   getUser(id: string): Promise<UserModel | null>;
   getUserByEmail(email: string): Promise<UserModel | null>;
-  createUser(user: Omit<UserModel, "id">): Promise<UserModel>;
   updateUser(
     id: string,
     user: Omit<UserModel, "id">,
@@ -14,18 +15,14 @@ interface IUserRepository {
 }
 
 class UserRepository implements IUserRepository {
-  async createUser(user: UserCreationParams): Promise<UserModel> {
+  async createUser(user: UserCreationParams): Promise<UserModel | null> {
     try {
-      const newUser: QueryResult<UserModel> | undefined = await db?.query(
+      const newUser: QueryResult<UserModel> | undefined = await db.query(
         "INSERT INTO users (username, password, email) VALUES ($1, $2, $3) RETURNING *",
         [user.username, user.password, user.email],
       );
 
-      if (!newUser?.rows[0]) {
-        throw new Error("Empty result");
-      }
-
-      return newUser.rows[0];
+      return newUser?.rows[ZERO] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to create User! Msg: ${(error as Error).message}`,
@@ -35,12 +32,12 @@ class UserRepository implements IUserRepository {
 
   async getUser(id: string): Promise<UserModel | null> {
     try {
-      const user: QueryResult<UserModel> | undefined = await db?.query(
+      const user: QueryResult<UserModel> | undefined = await db.query(
         "SELECT * FROM users WHERE id = $1",
         [id],
       );
 
-      return user?.rows[0] ? user.rows[0] : null;
+      return user?.rows[ZERO] ?? null;
     } catch (error: unknown) {
       throw new Error(`Failed to get User! Msg: ${(error as Error).message}`);
     }
@@ -48,12 +45,12 @@ class UserRepository implements IUserRepository {
 
   async getUserByEmail(email: string): Promise<UserModel | null> {
     try {
-      const user: QueryResult<UserModel> | undefined = await db?.query(
+      const user: QueryResult<UserModel> | undefined = await db.query(
         "SELECT * FROM users WHERE email = $1",
         [email],
       );
 
-      return user?.rows[0] ? user.rows[0] : null;
+      return user?.rows[ZERO] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to get User by email! Msg: ${(error as Error).message}`,
@@ -66,16 +63,12 @@ class UserRepository implements IUserRepository {
     user: UserCreationParams,
   ): Promise<UserModel | null> {
     try {
-      const affectedUsers: QueryResult<UserModel> | undefined = await db?.query(
+      const affectedUsers: QueryResult<UserModel> | undefined = await db.query(
         "UPDATE users SET username = $1, password = $2, email = $3 WHERE id = $4 RETURNING *",
         [user.username, user.password, user.email, id],
       );
 
-      if (!affectedUsers?.rows[0]) {
-        throw new Error("Empty result");
-      }
-
-      return affectedUsers.rows[0];
+      return affectedUsers?.rows[ZERO] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to update User! Msg: ${(error as Error).message}`,
@@ -85,12 +78,12 @@ class UserRepository implements IUserRepository {
 
   async deleteUser(id: string): Promise<UserModel | null> {
     try {
-      const deletedUser: QueryResult<UserModel> | undefined = await db?.query(
+      const deletedUser: QueryResult<UserModel> | undefined = await db.query(
         "DELETE FROM users WHERE id = $1 RETURNING *",
         [id],
       );
 
-      return deletedUser?.rows[0] ? deletedUser.rows[0] : null;
+      return deletedUser?.rows[ZERO] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to delete User! Msg: ${(error as Error).message}`,
