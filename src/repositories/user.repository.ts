@@ -1,6 +1,7 @@
 import type { QueryResult } from "pg";
 import type { UserModel, UserCreationParams } from "../models/user.model";
 import db from "../database/database";
+import { ZERO } from "../utils/constants";
 
 interface IUserRepository {
   createUser(user: Omit<UserModel, "id">): Promise<UserModel | null>;
@@ -21,7 +22,7 @@ class UserRepository implements IUserRepository {
         [user.username, user.password, user.email],
       );
 
-      return newUser?.rows[0] ?? null;
+      return newUser?.rows[ZERO] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to create User! Msg: ${(error as Error).message}`,
@@ -36,7 +37,7 @@ class UserRepository implements IUserRepository {
         [id],
       );
 
-      return user?.rows[0] ?? null;
+      return user?.rows[ZERO] ?? null;
     } catch (error: unknown) {
       throw new Error(`Failed to get User! Msg: ${(error as Error).message}`);
     }
@@ -49,7 +50,7 @@ class UserRepository implements IUserRepository {
         [email],
       );
 
-      return user?.rows[0] ?? null;
+      return user?.rows[ZERO] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to get User by email! Msg: ${(error as Error).message}`,
@@ -67,7 +68,7 @@ class UserRepository implements IUserRepository {
         [user.username, user.password, user.email, id],
       );
 
-      return affectedUsers?.rows[0] ?? null;
+      return affectedUsers?.rows[ZERO] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to update User! Msg: ${(error as Error).message}`,
@@ -82,7 +83,7 @@ class UserRepository implements IUserRepository {
         [id],
       );
 
-      return deletedUser?.rows[0] ?? null;
+      return deletedUser?.rows[ZERO] ?? null;
     } catch (error: unknown) {
       throw new Error(
         `Failed to delete User! Msg: ${(error as Error).message}`,

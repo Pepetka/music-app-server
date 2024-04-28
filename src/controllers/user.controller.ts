@@ -16,6 +16,13 @@ import {
 import UserRepository from "../repositories/user.repository";
 import type { UserModel, UserCreationParams } from "../models/user.model";
 import { ResponseError } from "../errors/response.error";
+import {
+  BAD_REQUEST_STATUS,
+  CREATED_STATUS,
+  INTERNAL_SERVER_ERROR_STATUS,
+  NO_CONTENT_STATUS,
+  NOT_FOUND_STATUS,
+} from "../utils/constants";
 
 @Tags("User")
 @Route("user")
@@ -25,9 +32,15 @@ export class UserController extends Controller {
    * @param userData The user to create.
    */
   @Post("create")
-  @Response<{ message: "Internal server error" }>(500, "Internal server error")
-  @Response<{ message: "Body is required" }>(400, "Body is required")
-  @SuccessResponse("201", "Created")
+  @Response<{ message: "Internal server error" }>(
+    INTERNAL_SERVER_ERROR_STATUS,
+    "Internal server error",
+  )
+  @Response<{ message: "Body is required" }>(
+    BAD_REQUEST_STATUS,
+    "Body is required",
+  )
+  @SuccessResponse(CREATED_STATUS, "Created")
   @Example({
     user: {
       userId: "<USER_ID>",
@@ -42,7 +55,7 @@ export class UserController extends Controller {
     const user = await UserRepository.createUser(userData);
 
     if (!user) {
-      throw new ResponseError("User not created", 500);
+      throw new ResponseError("User not created", INTERNAL_SERVER_ERROR_STATUS);
     }
 
     return {
@@ -54,9 +67,12 @@ export class UserController extends Controller {
    * @param id The id of the user to get.
    */
   @Get("/get/{id}")
-  @Response<{ message: "Internal server error" }>(500, "Internal server error")
-  @Response<{ message: "Not Found" }>(404, "Not Found")
-  @Response<{ message: "Id is required" }>(400, "Id is required")
+  @Response<{ message: "Internal server error" }>(
+    INTERNAL_SERVER_ERROR_STATUS,
+    "Internal server error",
+  )
+  @Response<{ message: "Not Found" }>(NOT_FOUND_STATUS, "Not Found")
+  @Response<{ message: "Id is required" }>(BAD_REQUEST_STATUS, "Id is required")
   @Example({
     user: {
       userId: "<USER_ID>",
@@ -71,7 +87,7 @@ export class UserController extends Controller {
     const user = await UserRepository.getUser(id);
 
     if (!user) {
-      throw new ResponseError("User not found", 404);
+      throw new ResponseError("User not found", NOT_FOUND_STATUS);
     }
 
     return {
@@ -83,9 +99,15 @@ export class UserController extends Controller {
    * @param email The email of the user to get.
    */
   @Get("/get")
-  @Response<{ message: "Internal server error" }>(500, "Internal server error")
-  @Response<{ message: "Not Found" }>(404, "Not Found")
-  @Response<{ message: "Email is required" }>(400, "Email is required")
+  @Response<{ message: "Internal server error" }>(
+    INTERNAL_SERVER_ERROR_STATUS,
+    "Internal server error",
+  )
+  @Response<{ message: "Not Found" }>(NOT_FOUND_STATUS, "Not Found")
+  @Response<{ message: "Email is required" }>(
+    BAD_REQUEST_STATUS,
+    "Email is required",
+  )
   @Example({
     user: {
       userId: "<USER_ID>",
@@ -100,7 +122,7 @@ export class UserController extends Controller {
     const user = await UserRepository.getUserByEmail(email);
 
     if (!user) {
-      throw new ResponseError("User not found", 404);
+      throw new ResponseError("User not found", NOT_FOUND_STATUS);
     }
 
     return {
@@ -113,13 +135,16 @@ export class UserController extends Controller {
    * @param userData The user to update.
    */
   @Put("/update/{id}")
-  @Response<{ message: "Internal server error" }>(500, "Internal server error")
-  @Response<{ message: "Not Found" }>(404, "Not Found")
+  @Response<{ message: "Internal server error" }>(
+    INTERNAL_SERVER_ERROR_STATUS,
+    "Internal server error",
+  )
+  @Response<{ message: "Not Found" }>(NOT_FOUND_STATUS, "Not Found")
   @Response<{ message: "Id and Body are required" }>(
-    400,
+    BAD_REQUEST_STATUS,
     "Id and Body are required",
   )
-  @SuccessResponse(204, "Updated")
+  @SuccessResponse(NO_CONTENT_STATUS, "Updated")
   public static async updateUser(
     @Path() id: string,
     @Body() userData: UserCreationParams,
@@ -127,7 +152,7 @@ export class UserController extends Controller {
     const user = await UserRepository.updateUser(id, userData);
 
     if (!user) {
-      throw new ResponseError("User not found", 404);
+      throw new ResponseError("User not found", NOT_FOUND_STATUS);
     }
   }
   /**
@@ -135,15 +160,18 @@ export class UserController extends Controller {
    * @param id The id of the user to delete.
    */
   @Delete("/delete/{id}")
-  @Response<{ message: "Internal server error" }>(500, "Internal server error")
-  @Response<{ message: "Not Found" }>(404, "Not Found")
-  @Response<{ message: "Id is required" }>(400, "Id is required")
-  @SuccessResponse(204, "Deleted")
+  @Response<{ message: "Internal server error" }>(
+    INTERNAL_SERVER_ERROR_STATUS,
+    "Internal server error",
+  )
+  @Response<{ message: "Not Found" }>(NOT_FOUND_STATUS, "Not Found")
+  @Response<{ message: "Id is required" }>(BAD_REQUEST_STATUS, "Id is required")
+  @SuccessResponse(NO_CONTENT_STATUS, "Deleted")
   public static async deleteUser(@Path() id: string): Promise<void> {
     const user = await UserRepository.deleteUser(id);
 
     if (!user) {
-      throw new ResponseError("User not found", 404);
+      throw new ResponseError("User not found", NOT_FOUND_STATUS);
     }
   }
 }

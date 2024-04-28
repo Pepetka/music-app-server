@@ -4,6 +4,11 @@ import {
   ResponseError,
   withResponseErrorBoundary,
 } from "../errors/response.error";
+import {
+  CREATED_STATUS,
+  NO_CONTENT_STATUS,
+  OK_STATUS,
+} from "../utils/constants";
 
 class UserRoutes {
   router: Router = Router();
@@ -15,55 +20,47 @@ class UserRoutes {
   initRoutes() {
     this.router.post("/create", async (req: Request, res: Response) => {
       await withResponseErrorBoundary(res, async () => {
-        if (!req.body) {
-          throw new ResponseError("Body is required", 400);
-        }
-        const newUser = await UserController.createUser(req.body);
-        return res.status(201).json(newUser);
+        const body = req.body;
+        ResponseError.emptyParams("Body is required", body);
+        const newUser = await UserController.createUser(body!);
+        return res.status(CREATED_STATUS).json(newUser);
       });
     });
 
     this.router.get("/get/:id", async (req: Request, res: Response) => {
       await withResponseErrorBoundary(res, async () => {
         const id = req.params.id;
-        if (!id) {
-          throw new ResponseError("Id is required", 400);
-        }
-        const user = await UserController.getUser(id);
-        return res.status(200).json(user);
+        ResponseError.emptyParams("Id is required", id);
+        const user = await UserController.getUser(id!);
+        return res.status(OK_STATUS).json(user);
       });
     });
 
     this.router.get("/get", async (req: Request, res: Response) => {
       await withResponseErrorBoundary(res, async () => {
         const email = req.query.email;
-        if (!email) {
-          throw new ResponseError("Email is required", 400);
-        }
+        ResponseError.emptyParams("Email is required", email);
         const user = await UserController.getUserByEmail(email as string);
-        return res.status(200).json(user);
+        return res.status(OK_STATUS).json(user);
       });
     });
 
     this.router.put("/update/:id", async (req: Request, res: Response) => {
       await withResponseErrorBoundary(res, async () => {
         const id = req.params.id;
-        if (!id || !req.body) {
-          throw new ResponseError("Id and Body are required", 400);
-        }
-        await UserController.updateUser(id, req.body);
-        return res.status(204).send();
+        const body = req.body;
+        ResponseError.emptyParams("Id and Body are required", id, body);
+        await UserController.updateUser(id!, body!);
+        return res.status(NO_CONTENT_STATUS).send();
       });
     });
 
     this.router.delete("/delete/:id", async (req: Request, res: Response) => {
       await withResponseErrorBoundary(res, async () => {
         const id = req.params.id;
-        if (!id) {
-          throw new ResponseError("Id is required", 400);
-        }
-        await UserController.deleteUser(id);
-        return res.status(204).send();
+        ResponseError.emptyParams("Id is required", id);
+        await UserController.deleteUser(id!);
+        return res.status(NO_CONTENT_STATUS).send();
       });
     });
   }
