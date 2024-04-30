@@ -21,9 +21,6 @@
     "prettier/prettier": [
       1,
       {
-        "endOfLine": "lf"
-      },
-      {
         "usePrettierrc": true
       }
     ]
