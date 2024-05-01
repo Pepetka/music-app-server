@@ -24,7 +24,7 @@ class UsersRoutes {
 
   initRoutes() {
     this.router.get("/all", async (req: Request, res: Response) => {
-      await withResponseErrorBoundary(res, async () => {
+      await withResponseErrorBoundary(req, res, async () => {
         const users = await UserController.getAllUsers();
         await sleep(1000);
         await redisCache.set(req.originalUrl, users);
@@ -35,7 +35,7 @@ class UsersRoutes {
     });
 
     this.router.get("/get/:id", async (req: Request, res: Response) => {
-      await withResponseErrorBoundary(res, async () => {
+      await withResponseErrorBoundary(req, res, async () => {
         const id = req.params.id;
         ResponseError.emptyParams("Id is required", id);
         const user = await UserController.getUser(id!);
@@ -48,7 +48,7 @@ class UsersRoutes {
     });
 
     this.router.get("/get", async (req: Request, res: Response) => {
-      await withResponseErrorBoundary(res, async () => {
+      await withResponseErrorBoundary(req, res, async () => {
         const email = req.query.email;
         ResponseError.emptyParams("Email is required", email);
         const user = await UserController.getUserByEmail(email as string);
@@ -61,7 +61,7 @@ class UsersRoutes {
     });
 
     this.router.post("/create", async (req: Request, res: Response) => {
-      await withResponseErrorBoundary(res, async () => {
+      await withResponseErrorBoundary(req, res, async () => {
         const body = req.body;
         ResponseError.emptyParams("Body is required", body);
         const user = await UserController.createUser(body!);
@@ -73,7 +73,7 @@ class UsersRoutes {
     });
 
     this.router.put("/update/:id", async (req: Request, res: Response) => {
-      await withResponseErrorBoundary(res, async () => {
+      await withResponseErrorBoundary(req, res, async () => {
         const id = req.params.id;
         const body = req.body;
         ResponseError.emptyParams("Id and Body are required", id, body);
@@ -84,7 +84,7 @@ class UsersRoutes {
     });
 
     this.router.delete("/delete/:id", async (req: Request, res: Response) => {
-      await withResponseErrorBoundary(res, async () => {
+      await withResponseErrorBoundary(req, res, async () => {
         const id = req.params.id;
         ResponseError.emptyParams("Id is required", id);
         const user = await UserController.deleteUser(id!);

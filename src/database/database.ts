@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import logger from "../utils/logger";
 import { config } from "./database.config";
 
 class Database {
@@ -20,10 +21,10 @@ class Database {
     await this.pool
       .connect()
       .then(() => {
-        console.log("Connection has been established successfully.");
+        logger.debug("Connection has been established successfully.");
       })
       .catch((err) => {
-        console.error("Unable to connect to the Database:", err);
+        logger.error(`Unable to connect to the Database: ${err.toString()}`);
       });
   }
 

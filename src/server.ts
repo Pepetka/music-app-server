@@ -5,6 +5,7 @@ import cors, { CorsOptions } from "cors";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 import swaggerJson from "../../openApi/swagger.json";
+import logger from "./utils/logger";
 import Routes from "./routes";
 
 class Server {
@@ -38,13 +39,13 @@ class Server {
   public listen(port: number) {
     this.server
       .listen(port, "localhost", () => {
-        console.log(`Server listening on port ${port}`);
+        logger.debug(`Server listening on port ${port}`);
       })
       .on("error", (err: Error | string) => {
         if (err === "EADDRINUSE") {
-          console.log(`Port ${port} is already in use`);
+          logger.debug(`Port ${port} is already in use`);
         } else {
-          console.error(err);
+          logger.error(err);
         }
       });
   }
