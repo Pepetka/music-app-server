@@ -2,13 +2,13 @@ import { Response, Router } from "express";
 import { NOT_FOUND_STATUS } from "../utils/constants";
 
 class NotFoundRoutes {
-  router: Router = Router();
+  public readonly router: Router = Router();
 
   constructor() {
     this.initRoutes();
   }
 
-  initRoutes() {
+  private initRoutes() {
     this.router.get("*", (_, res: Response) => {
       res.status(NOT_FOUND_STATUS).json({
         message: "Not found",

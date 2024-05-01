@@ -10,6 +10,7 @@
     "prebuild": "npm run swagger && npm run clean",
     "swagger": "tsoa spec",
     "clean": "rimraf dist/",
+    "service:test:dev": "nodemon ./src/services/test/test.service.ts",
     "rabbitmq:start": "docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.13-management",
     "redis:start": "docker run -p 6379:6379 -it redis/redis-stack-server:latest",
     "prettier:fix": "prettier --write \"src/**/*.ts\"",

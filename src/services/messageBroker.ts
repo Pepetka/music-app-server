@@ -21,26 +21,26 @@ type SubscribeExArgs = {
 };
 
 class MessageBroker {
-  queues: Record<
+  private readonly queues: Record<
     string,
     Array<(data: ConsumeMessage, ask: OnceCallbackType) => void>
   >;
-  connection: Connection | undefined;
-  channel: Channel | undefined;
-  exchange: string | undefined;
+  private connection: Connection | undefined;
+  private channel: Channel | undefined;
+  private exchange: string | undefined;
 
   constructor() {
     this.queues = {};
   }
 
-  async init(): Promise<MessageBroker> {
+  public async init(): Promise<MessageBroker> {
     if (this.connection) return this;
     this.connection = await amqp.connect("amqp://localhost", "heartbeat=60");
     this.channel = await this.connection.createChannel();
     return this;
   }
 
-  async createEx({
+  public async createEx({
     name,
     type,
     durable = true,
@@ -51,7 +51,7 @@ class MessageBroker {
     return this;
   }
 
-  async publishEx(
+  public async publishEx(
     { exchange, routingKey, withReplyTo = false, callback }: PublishExArgs,
     msg: string,
   ): Promise<void> {
@@ -95,7 +95,7 @@ class MessageBroker {
     };
   }
 
-  async subscribeEx(
+  public async subscribeEx(
     { exchange, bindingKey }: SubscribeExArgs,
     handler: (data: ConsumeMessage, ack: () => void) => void,
   ): Promise<() => void> {
@@ -127,7 +127,7 @@ class MessageBroker {
     return () => this.unsubscribeEx(queue, handler);
   }
 
-  async replyTo({
+  public async replyTo({
     replyTo,
     correlationId,
     replyData,
@@ -141,7 +141,7 @@ class MessageBroker {
     });
   }
 
-  unsubscribeEx(
+  public unsubscribeEx(
     queue: string,
     handler: (data: ConsumeMessage, ack: () => void) => void,
   ): void {
@@ -149,7 +149,7 @@ class MessageBroker {
     this.queues[queue] = this.queues[queue]!.filter((h) => h !== handler);
   }
 
-  async close(): Promise<void> {
+  public async close(): Promise<void> {
     if (!this.connection) return;
     await this.channel!.close();
     await this.connection.close();
