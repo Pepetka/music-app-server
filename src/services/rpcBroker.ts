@@ -5,7 +5,6 @@ type RpcBrokerProviderArgs = {
   exchange: string;
   routingKey: string;
   message: unknown;
-  autoClose?: boolean;
   callback?: (message: ConsumeMessage) => void;
 };
 
@@ -13,48 +12,46 @@ type RpcBrokerConsumerArgs = {
   exchange: string;
   bindingKey: string;
   callback: (message: ConsumeMessage) => Promise<string>;
-  autoClose?: boolean;
 };
 
 class RpcBroker {
-  static async provider(args: RpcBrokerProviderArgs) {
-    const { message, exchange, routingKey, autoClose = true, callback } = args;
+  private readonly broker: MessageBroker;
 
-    const broker = await new MessageBroker().init();
-    await broker.createEx({ name: exchange, type: "direct" });
-    await broker.publishEx(
+  constructor(broker: MessageBroker) {
+    this.broker = broker;
+  }
+
+  public async provider(args: RpcBrokerProviderArgs) {
+    const { message, exchange, routingKey, callback } = args;
+
+    await this.broker.createEx({ name: exchange, type: "direct" });
+    await this.broker.publishEx(
       {
         exchange,
         routingKey,
         withReplyTo: true,
-        callback: (msg) => {
-          callback?.(msg);
-          if (autoClose) {
-            broker.close();
-          }
-        },
+        callback,
       },
       JSON.stringify(message),
     );
   }
 
-  static async consumer(args: RpcBrokerConsumerArgs) {
-    const { callback, exchange, bindingKey, autoClose = false } = args;
+  public async consumer(args: RpcBrokerConsumerArgs) {
+    const { callback, exchange, bindingKey } = args;
 
-    const broker = await new MessageBroker().init();
-    await broker.createEx({ name: exchange, type: "direct" });
-    await broker.subscribeEx({ exchange, bindingKey }, async (msg, ack) => {
-      const replyData = await callback(msg);
-      await broker.replyTo({
-        replyTo: msg.properties.replyTo,
-        correlationId: msg.properties.correlationId,
-        replyData,
-      });
-      ack();
-    });
-    if (autoClose) {
-      await broker.close();
-    }
+    await this.broker.createEx({ name: exchange, type: "direct" });
+    await this.broker.subscribeEx(
+      { exchange, bindingKey },
+      async (msg, ack) => {
+        const replyData = await callback(msg);
+        await this.broker.replyTo({
+          replyTo: msg.properties.replyTo,
+          correlationId: msg.properties.correlationId,
+          replyData,
+        });
+        ack();
+      },
+    );
   }
 }
 

@@ -36,6 +36,10 @@ class Server {
     app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerJson));
   }
 
+  public close() {
+    this.server.close();
+  }
+
   public listen(port: number) {
     this.server
       .listen(port, "localhost", () => {

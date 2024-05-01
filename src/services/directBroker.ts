@@ -5,40 +5,42 @@ type DirectBrokerProviderArgs = {
   exchange: string;
   routingKey: string;
   message: unknown;
-  autoClose?: boolean;
 };
 
 type DirectBrokerConsumerArgs = {
   exchange: string;
   bindingKey: string;
   callback: (message: ConsumeMessage) => Promise<void>;
-  autoClose?: boolean;
 };
 
 class DirectBroker {
-  static async provider(args: DirectBrokerProviderArgs) {
-    const { message, exchange, routingKey, autoClose = true } = args;
+  private readonly broker: MessageBroker;
 
-    const broker = await new MessageBroker().init();
-    await broker.createEx({ name: exchange, type: "direct" });
-    await broker.publishEx({ exchange, routingKey }, JSON.stringify(message));
-    if (autoClose) {
-      await broker.close();
-    }
+  constructor(broker: MessageBroker) {
+    this.broker = broker;
   }
 
-  static async consumer(args: DirectBrokerConsumerArgs) {
-    const { callback, exchange, bindingKey, autoClose = false } = args;
+  public async provider(args: DirectBrokerProviderArgs) {
+    const { message, exchange, routingKey } = args;
 
-    const broker = await new MessageBroker().init();
-    await broker.createEx({ name: exchange, type: "direct" });
-    await broker.subscribeEx({ exchange, bindingKey }, async (msg, ack) => {
-      await callback(msg);
-      ack();
-    });
-    if (autoClose) {
-      await broker.close();
-    }
+    await this.broker.createEx({ name: exchange, type: "direct" });
+    await this.broker.publishEx(
+      { exchange, routingKey },
+      JSON.stringify(message),
+    );
+  }
+
+  public async consumer(args: DirectBrokerConsumerArgs) {
+    const { callback, exchange, bindingKey } = args;
+
+    await this.broker.createEx({ name: exchange, type: "direct" });
+    await this.broker.subscribeEx(
+      { exchange, bindingKey },
+      async (msg, ack) => {
+        await callback(msg);
+        ack();
+      },
+    );
   }
 }
 

@@ -14,6 +14,7 @@ import {
   Delete,
 } from "tsoa";
 import UserRepository from "../repositories/users.repository";
+import { database } from "../tools";
 import type { UserModel, UserCreationParams } from "../models/user.model";
 import { ResponseError } from "../errors/response.error";
 import {
@@ -26,7 +27,13 @@ import {
 
 @Tags("Users")
 @Route("users")
-export class UserController extends Controller {
+class UserController extends Controller {
+  repository: UserRepository;
+
+  constructor() {
+    super();
+    this.repository = new UserRepository(database.pool);
+  }
   /**
    * Get all users.
    */
@@ -52,8 +59,8 @@ export class UserController extends Controller {
       },
     ],
   })
-  public static async getAllUsers(): Promise<UserModel[]> {
-    const users = await UserRepository.getAllUsers();
+  public async getAllUsers(): Promise<UserModel[]> {
+    const users = await this.repository.getAllUsers();
 
     if (!users) {
       throw new ResponseError("Users not found", NOT_FOUND_STATUS);
@@ -80,8 +87,8 @@ export class UserController extends Controller {
       email: "<EMAIL>",
     },
   })
-  public static async getUser(@Path() id: string): Promise<UserModel> {
-    const user = await UserRepository.getUser(id);
+  public async getUser(@Path() id: string): Promise<UserModel> {
+    const user = await this.repository.getUser(id);
 
     if (!user) {
       throw new ResponseError("User not found", NOT_FOUND_STATUS);
@@ -111,10 +118,8 @@ export class UserController extends Controller {
       email: "<EMAIL>",
     },
   })
-  public static async getUserByEmail(
-    @Query() email: string,
-  ): Promise<UserModel> {
-    const user = await UserRepository.getUserByEmail(email);
+  public async getUserByEmail(@Query() email: string): Promise<UserModel> {
+    const user = await this.repository.getUserByEmail(email);
 
     if (!user) {
       throw new ResponseError("User not found", NOT_FOUND_STATUS);
@@ -144,10 +149,10 @@ export class UserController extends Controller {
       email: "<EMAIL>",
     },
   })
-  public static async createUser(
+  public async createUser(
     @Body() userData: UserCreationParams,
   ): Promise<UserModel> {
-    const user = await UserRepository.createUser(userData);
+    const user = await this.repository.createUser(userData);
 
     if (!user) {
       throw new ResponseError("User not created", INTERNAL_SERVER_ERROR_STATUS);
@@ -171,11 +176,11 @@ export class UserController extends Controller {
     "Id and Body are required",
   )
   @SuccessResponse(NO_CONTENT_STATUS, "Updated")
-  public static async updateUser(
+  public async updateUser(
     @Path() id: string,
     @Body() userData: UserCreationParams,
   ): Promise<UserModel> {
-    const user = await UserRepository.updateUser(id, userData);
+    const user = await this.repository.updateUser(id, userData);
 
     if (!user) {
       throw new ResponseError("User not found", NOT_FOUND_STATUS);
@@ -195,8 +200,8 @@ export class UserController extends Controller {
   @Response<{ message: "Not Found" }>(NOT_FOUND_STATUS, "Not Found")
   @Response<{ message: "Id is required" }>(BAD_REQUEST_STATUS, "Id is required")
   @SuccessResponse(NO_CONTENT_STATUS, "Deleted")
-  public static async deleteUser(@Path() id: string): Promise<UserModel> {
-    const user = await UserRepository.deleteUser(id);
+  public async deleteUser(@Path() id: string): Promise<UserModel> {
+    const user = await this.repository.deleteUser(id);
 
     if (!user) {
       throw new ResponseError("User not found", NOT_FOUND_STATUS);
@@ -205,3 +210,5 @@ export class UserController extends Controller {
     return user;
   }
 }
+
+export default UserController;

@@ -3,16 +3,15 @@ import logger from "../utils/logger";
 import { config } from "./database.config";
 
 class Database {
-  public pool: Pool;
+  public readonly pool: Pool;
 
   constructor() {
     this.pool = new Pool({
       ...config,
     });
-    this.init();
   }
 
-  private async init() {
+  public async init() {
     await this.connectToDatabase();
     await this.createTable();
   }
@@ -26,6 +25,10 @@ class Database {
       .catch((err) => {
         logger.error(`Unable to connect to the Database: ${err.toString()}`);
       });
+  }
+
+  public async disconnect() {
+    await this.pool.end();
   }
 
   private async createTable() {
@@ -42,4 +45,4 @@ class Database {
   }
 }
 
-export default new Database().pool;
+export default Database;

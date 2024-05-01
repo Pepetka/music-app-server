@@ -1,6 +1,5 @@
-import type { QueryResult } from "pg";
+import type { QueryResult, Pool } from "pg";
 import type { UserModel, UserCreationParams } from "../models/user.model";
-import db from "../database/database";
 import { ZERO } from "../utils/constants";
 
 interface IUsersRepository {
@@ -16,9 +15,15 @@ interface IUsersRepository {
 }
 
 class UsersRepository implements IUsersRepository {
-  async createUser(user: UserCreationParams): Promise<UserModel | null> {
+  private readonly db: Pool;
+
+  constructor(database: Pool) {
+    this.db = database;
+  }
+
+  public async createUser(user: UserCreationParams): Promise<UserModel | null> {
     try {
-      const newUser: QueryResult<UserModel> | undefined = await db.query(
+      const newUser: QueryResult<UserModel> | undefined = await this.db.query(
         "INSERT INTO users (username, password, email) VALUES ($1, $2, $3) RETURNING *",
         [user.username, user.password, user.email],
       );
@@ -31,9 +36,9 @@ class UsersRepository implements IUsersRepository {
     }
   }
 
-  async getAllUsers(): Promise<UserModel[] | null> {
+  public async getAllUsers(): Promise<UserModel[] | null> {
     try {
-      const users: QueryResult<UserModel> | undefined = await db.query(
+      const users: QueryResult<UserModel> | undefined = await this.db.query(
         "SELECT * FROM users ORDER BY id ASC",
       );
 
@@ -43,9 +48,9 @@ class UsersRepository implements IUsersRepository {
     }
   }
 
-  async getUser(id: string): Promise<UserModel | null> {
+  public async getUser(id: string): Promise<UserModel | null> {
     try {
-      const user: QueryResult<UserModel> | undefined = await db.query(
+      const user: QueryResult<UserModel> | undefined = await this.db.query(
         "SELECT * FROM users WHERE id = $1",
         [id],
       );
@@ -56,9 +61,9 @@ class UsersRepository implements IUsersRepository {
     }
   }
 
-  async getUserByEmail(email: string): Promise<UserModel | null> {
+  public async getUserByEmail(email: string): Promise<UserModel | null> {
     try {
-      const user: QueryResult<UserModel> | undefined = await db.query(
+      const user: QueryResult<UserModel> | undefined = await this.db.query(
         "SELECT * FROM users WHERE email = $1",
         [email],
       );
@@ -71,15 +76,16 @@ class UsersRepository implements IUsersRepository {
     }
   }
 
-  async updateUser(
+  public async updateUser(
     id: string,
     user: UserCreationParams,
   ): Promise<UserModel | null> {
     try {
-      const affectedUsers: QueryResult<UserModel> | undefined = await db.query(
-        "UPDATE users SET username = $1, password = $2, email = $3 WHERE id = $4 RETURNING *",
-        [user.username, user.password, user.email, id],
-      );
+      const affectedUsers: QueryResult<UserModel> | undefined =
+        await this.db.query(
+          "UPDATE users SET username = $1, password = $2, email = $3 WHERE id = $4 RETURNING *",
+          [user.username, user.password, user.email, id],
+        );
 
       return affectedUsers?.rows[ZERO] ?? null;
     } catch (error: unknown) {
@@ -89,12 +95,12 @@ class UsersRepository implements IUsersRepository {
     }
   }
 
-  async deleteUser(id: string): Promise<UserModel | null> {
+  public async deleteUser(id: string): Promise<UserModel | null> {
     try {
-      const deletedUser: QueryResult<UserModel> | undefined = await db.query(
-        "DELETE FROM users WHERE id = $1 RETURNING *",
-        [id],
-      );
+      const deletedUser: QueryResult<UserModel> | undefined =
+        await this.db.query("DELETE FROM users WHERE id = $1 RETURNING *", [
+          id,
+        ]);
 
       return deletedUser?.rows[ZERO] ?? null;
     } catch (error: unknown) {
@@ -105,4 +111,4 @@ class UsersRepository implements IUsersRepository {
   }
 }
 
-export default new UsersRepository();
+export default UsersRepository;
