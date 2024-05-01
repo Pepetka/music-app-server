@@ -31,6 +31,7 @@ export const withResponseErrorBoundary = async (
   try {
     await tryCallback();
   } catch (error: unknown) {
+    console.error(error);
     if (error instanceof ResponseError) {
       return res.status(error.status).json({ message: error.message });
     } else {

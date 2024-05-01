@@ -3,8 +3,9 @@ import type { UserModel, UserCreationParams } from "../models/user.model";
 import db from "../database/database";
 import { ZERO } from "../utils/constants";
 
-interface IUserRepository {
+interface IUsersRepository {
   createUser(user: Omit<UserModel, "id">): Promise<UserModel | null>;
+  getAllUsers(): Promise<UserModel[] | null>;
   getUser(id: string): Promise<UserModel | null>;
   getUserByEmail(email: string): Promise<UserModel | null>;
   updateUser(
@@ -14,7 +15,7 @@ interface IUserRepository {
   deleteUser(id: string): Promise<UserModel | null>;
 }
 
-class UserRepository implements IUserRepository {
+class UsersRepository implements IUsersRepository {
   async createUser(user: UserCreationParams): Promise<UserModel | null> {
     try {
       const newUser: QueryResult<UserModel> | undefined = await db.query(
@@ -27,6 +28,18 @@ class UserRepository implements IUserRepository {
       throw new Error(
         `Failed to create User! Msg: ${(error as Error).message}`,
       );
+    }
+  }
+
+  async getAllUsers(): Promise<UserModel[] | null> {
+    try {
+      const users: QueryResult<UserModel> | undefined = await db.query(
+        "SELECT * FROM users ORDER BY id ASC",
+      );
+
+      return users?.rows ?? null;
+    } catch (error: unknown) {
+      throw new Error(`Failed to get Users! Msg: ${(error as Error).message}`);
     }
   }
 
@@ -92,4 +105,4 @@ class UserRepository implements IUserRepository {
   }
 }
 
-export default new UserRepository();
+export default new UsersRepository();
