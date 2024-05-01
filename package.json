@@ -9,7 +9,8 @@
     "predev": "npm run swagger",
     "prebuild": "npm run swagger",
     "swagger": "tsoa spec",
-    "rabbitmq": "docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.13-management",
+    "rabbitmq:start": "docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.13-management",
+    "redis:start": "docker run -p 6379:6379 -it redis/redis-stack-server:latest",
     "prettier:fix": "prettier --write \"src/**/*.ts\"",
     "prettier:check": "prettier --check \"src/**/*.ts\"",
     "lint:fix": "eslint --fix --ignore-path .eslintignore \"src/**/*.ts\"",
@@ -31,6 +32,7 @@
     "morgan": "^1.10.0",
     "pg": "^8.11.5",
     "pg-hstore": "^2.3.4",
+    "redis": "^4.6.13",
     "swagger-ui-express": "^5.0.0",
     "tsoa": "^6.2.0",
     "uuid": "^9.0.1"
@@ -61,8 +63,7 @@
   },
   "lint-staged": {
     "*.ts": [
-      "npm run lint:fix",
-      "git add"
+      "npm run lint:check"
     ]
   },
   "engines": {

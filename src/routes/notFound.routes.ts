@@ -41,4 +41,4 @@ class NotFoundRoutes {
   }
 }
 
-export default new NotFoundRoutes().router;
+export default NotFoundRoutes;

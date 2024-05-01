@@ -13,7 +13,7 @@ import {
   Put,
   Delete,
 } from "tsoa";
-import UserRepository from "../repositories/user.repository";
+import UserRepository from "../repositories/users.repository";
 import type { UserModel, UserCreationParams } from "../models/user.model";
 import { ResponseError } from "../errors/response.error";
 import {
@@ -24,43 +24,42 @@ import {
   NOT_FOUND_STATUS,
 } from "../utils/constants";
 
-@Tags("User")
-@Route("user")
+@Tags("Users")
+@Route("users")
 export class UserController extends Controller {
   /**
-   * Create a new user.
-   * @param userData The user to create.
+   * Get all users.
    */
-  @Post("create")
+  @Get("/all")
   @Response<{ message: "Internal server error" }>(
     INTERNAL_SERVER_ERROR_STATUS,
     "Internal server error",
   )
-  @Response<{ message: "Body is required" }>(
-    BAD_REQUEST_STATUS,
-    "Body is required",
-  )
-  @SuccessResponse(CREATED_STATUS, "Created")
+  @Response<{ message: "Not Found" }>(NOT_FOUND_STATUS, "Not Found")
   @Example({
-    user: {
-      userId: "<USER_ID>",
-      username: "<USERNAME>",
-      password: "<PASSWORD>",
-      email: "<EMAIL>",
-    },
+    users: [
+      {
+        userId: "<USER_ID>",
+        username: "<USERNAME>",
+        password: "<PASSWORD>",
+        email: "<EMAIL>",
+      },
+      {
+        userId: "<USER_ID>",
+        username: "<USERNAME>",
+        password: "<PASSWORD>",
+        email: "<EMAIL>",
+      },
+    ],
   })
-  public static async createUser(
-    @Body() userData: UserCreationParams,
-  ): Promise<{ user: UserModel }> {
-    const user = await UserRepository.createUser(userData);
+  public static async getAllUsers(): Promise<UserModel[]> {
+    const users = await UserRepository.getAllUsers();
 
-    if (!user) {
-      throw new ResponseError("User not created", INTERNAL_SERVER_ERROR_STATUS);
+    if (!users) {
+      throw new ResponseError("Users not found", NOT_FOUND_STATUS);
     }
 
-    return {
-      user,
-    };
+    return users;
   }
   /**
    * Get a user by id.
@@ -81,18 +80,14 @@ export class UserController extends Controller {
       email: "<EMAIL>",
     },
   })
-  public static async getUser(
-    @Path() id: string,
-  ): Promise<{ user: UserModel | null }> {
+  public static async getUser(@Path() id: string): Promise<UserModel> {
     const user = await UserRepository.getUser(id);
 
     if (!user) {
       throw new ResponseError("User not found", NOT_FOUND_STATUS);
     }
 
-    return {
-      user,
-    };
+    return user;
   }
   /**
    * Get a user by email.
@@ -118,16 +113,47 @@ export class UserController extends Controller {
   })
   public static async getUserByEmail(
     @Query() email: string,
-  ): Promise<{ user: UserModel | null }> {
+  ): Promise<UserModel> {
     const user = await UserRepository.getUserByEmail(email);
 
     if (!user) {
       throw new ResponseError("User not found", NOT_FOUND_STATUS);
     }
 
-    return {
-      user,
-    };
+    return user;
+  }
+  /**
+   * Create a new user.
+   * @param userData The user to create.
+   */
+  @Post("create")
+  @Response<{ message: "Internal server error" }>(
+    INTERNAL_SERVER_ERROR_STATUS,
+    "Internal server error",
+  )
+  @Response<{ message: "Body is required" }>(
+    BAD_REQUEST_STATUS,
+    "Body is required",
+  )
+  @SuccessResponse(CREATED_STATUS, "Created")
+  @Example({
+    user: {
+      userId: "<USER_ID>",
+      username: "<USERNAME>",
+      password: "<PASSWORD>",
+      email: "<EMAIL>",
+    },
+  })
+  public static async createUser(
+    @Body() userData: UserCreationParams,
+  ): Promise<UserModel> {
+    const user = await UserRepository.createUser(userData);
+
+    if (!user) {
+      throw new ResponseError("User not created", INTERNAL_SERVER_ERROR_STATUS);
+    }
+
+    return user;
   }
   /**
    * Update a user.
@@ -148,12 +174,14 @@ export class UserController extends Controller {
   public static async updateUser(
     @Path() id: string,
     @Body() userData: UserCreationParams,
-  ): Promise<void> {
+  ): Promise<UserModel> {
     const user = await UserRepository.updateUser(id, userData);
 
     if (!user) {
       throw new ResponseError("User not found", NOT_FOUND_STATUS);
     }
+
+    return user;
   }
   /**
    * Delete a user.
@@ -167,11 +195,13 @@ export class UserController extends Controller {
   @Response<{ message: "Not Found" }>(NOT_FOUND_STATUS, "Not Found")
   @Response<{ message: "Id is required" }>(BAD_REQUEST_STATUS, "Id is required")
   @SuccessResponse(NO_CONTENT_STATUS, "Deleted")
-  public static async deleteUser(@Path() id: string): Promise<void> {
+  public static async deleteUser(@Path() id: string): Promise<UserModel> {
     const user = await UserRepository.deleteUser(id);
 
     if (!user) {
       throw new ResponseError("User not found", NOT_FOUND_STATUS);
     }
+
+    return user;
   }
 }
