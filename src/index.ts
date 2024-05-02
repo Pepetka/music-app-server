@@ -43,4 +43,8 @@ import logger from "./utils/logger";
 
   process.on("SIGINT", onShutdown);
   process.on("SIGTERM", onShutdown);
+  process.on("uncaughtException", (error) => {
+    logger.error(error);
+    onShutdown();
+  });
 })();

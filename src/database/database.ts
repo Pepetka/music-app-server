@@ -1,11 +1,13 @@
 import { Pool } from "pg";
+import { prodConfig, devConfig } from "./database.config";
 import logger from "../utils/logger";
-import { config } from "./database.config";
 
 class Database {
   public readonly pool: Pool;
 
   constructor() {
+    const config =
+      process.env.NODE_ENV === "production" ? prodConfig : devConfig;
     this.pool = new Pool({
       ...config,
     });
