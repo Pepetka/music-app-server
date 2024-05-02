@@ -1,0 +1,33 @@
+version: '3.7'
+
+services:
+  dev_rabbitmq:
+    image: rabbitmq:3-management
+    container_name: dev_postgres_rabbitmq
+    restart: on-failure
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - ./local_db/rabbitmq_volume:/var/lib/rabbitmq
+
+  dev_redis:
+    image: redis
+    container_name: dev_postgres_redis
+    restart: on-failure
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./local_db/redis_volume:/data
+
+  dev_postgres:
+    image: postgres
+    container_name: dev_postgres_postgresql
+    environment:
+      POSTGRES_PASSWORD: postgres
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./local_db/postgres_volume:/var/lib/postgresql/data
