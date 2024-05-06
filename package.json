@@ -5,7 +5,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production npx tsc",
     "start": "cross-env NODE_ENV=production node dist/index.js",
-    "dev": "cross-env NODE_ENV=development concurrently \"npx tsc --watch --preserveWatchOutput\" \"nodemon src/index.ts\" \"nodemon -x tsoa spec\"",
+    "dev": "cross-env NODE_ENV=development concurrently \"npx tsc --watch\" \"nodemon src/index.ts\" \"nodemon -x tsoa spec\" --prefix \"[{index}]-{pid}:\"",
     "predev": "npm run swagger",
     "prebuild": "npm run swagger && npm run clean",
     "swagger": "tsoa spec",

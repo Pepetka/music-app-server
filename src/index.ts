@@ -18,14 +18,10 @@ import logger from "./utils/logger";
   server.listen(PORT);
 
   const onShutdown = () => {
-    Promise.all([
-      database.disconnect(),
-      cache.disconnect(),
-      broker.close(),
-      server.close,
-    ])
+    server.close();
+    Promise.all([database.disconnect(), cache.disconnect(), broker.close()])
       .then(() => {
-        logger.info("Server closed");
+        logger.debug("Server closed");
         logger.close();
         process.exit(0);
       })
@@ -36,6 +32,7 @@ import logger from "./utils/logger";
       });
 
     setTimeout(() => {
+      logger.debug("Server closed by timeout");
       logger.close();
       process.exit(1);
     }, 5000);
