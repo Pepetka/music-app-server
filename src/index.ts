@@ -9,7 +9,7 @@ import logger from "./utils/logger";
   const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 8080;
 
   await database.init();
-  await cache.connect();
+  await cache.init();
   await broker.init();
 
   const app: Application = express();

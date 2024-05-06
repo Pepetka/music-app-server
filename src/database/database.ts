@@ -14,11 +14,10 @@ class Database {
   }
 
   public async init() {
-    await this.connectToDatabase();
-    await this.createTable();
+    await this.connect();
   }
 
-  private async connectToDatabase() {
+  private async connect() {
     await this.pool
       .connect()
       .then(() => {
@@ -26,24 +25,12 @@ class Database {
       })
       .catch((err) => {
         logger.error(`Unable to connect to the Database: ${err.toString()}`);
+        throw err;
       });
   }
 
   public async disconnect() {
     await this.pool.end();
-  }
-
-  private async createTable() {
-    const createCommand = `
-      CREATE TABLE IF NOT EXISTS "users" (
-      "id" SERIAL,
-      "username" VARCHAR(100) NOT NULL,
-      "password" VARCHAR(100) NOT NULL,
-      "email" VARCHAR(100),
-      PRIMARY KEY ("id")
-    );`;
-
-    await this.pool.query(createCommand);
   }
 }
 
