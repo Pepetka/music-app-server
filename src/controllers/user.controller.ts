@@ -88,7 +88,7 @@ class UserController extends Controller {
     },
   })
   public async getUser(@Path() id: string): Promise<UserModel> {
-    const user = await this.repository.getUser(id);
+    const user = await this.repository.getUserById(id);
 
     if (!user) {
       throw new ResponseError("User not found", NOT_FOUND_STATUS);

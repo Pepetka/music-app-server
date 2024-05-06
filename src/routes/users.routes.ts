@@ -27,7 +27,13 @@ class UsersRoutes {
     this.router.get("/all", async (req: Request, res: Response) => {
       await withResponseErrorBoundary(req, res, async () => {
         const users = await this.userController.getAllUsers();
-        await cache.set(req.originalUrl, users);
+        await cache.set(
+          req.originalUrl,
+          {
+            users,
+          },
+          60 * 60,
+        );
         return res.status(OK_STATUS).json({
           users,
         });
@@ -39,7 +45,13 @@ class UsersRoutes {
         const id = req.params.id;
         ResponseError.emptyParams("Id is required", id);
         const user = await this.userController.getUser(id!);
-        await cache.set(req.originalUrl, user);
+        await cache.set(
+          req.originalUrl,
+          {
+            user,
+          },
+          60 * 60,
+        );
         return res.status(OK_STATUS).json({
           user,
         });
@@ -51,7 +63,13 @@ class UsersRoutes {
         const email = req.query.email;
         ResponseError.emptyParams("Email is required", email);
         const user = await this.userController.getUserByEmail(email as string);
-        await cache.set(req.originalUrl, user);
+        await cache.set(
+          req.originalUrl,
+          {
+            user,
+          },
+          60 * 60,
+        );
         return res.status(OK_STATUS).json({
           user,
         });

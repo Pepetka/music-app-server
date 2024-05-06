@@ -7,6 +7,10 @@ class RedisCache {
     this.client = createClient();
   }
 
+  public async init() {
+    await this.client.connect();
+  }
+
   public async connect() {
     await this.client.connect();
   }
