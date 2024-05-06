@@ -1,9 +1,10 @@
-import { Pool } from "pg";
+import { Pool, PoolClient } from "pg";
 import { prodConfig, devConfig } from "./database.config";
 import logger from "../utils/logger";
 
 class Database {
   public readonly pool: Pool;
+  private client: PoolClient | undefined;
 
   constructor() {
     const config =
@@ -20,7 +21,8 @@ class Database {
   private async connect() {
     await this.pool
       .connect()
-      .then(() => {
+      .then((client) => {
+        this.client = client;
         logger.debug("Connection has been established successfully.");
       })
       .catch((err) => {
@@ -30,6 +32,7 @@ class Database {
   }
 
   public async disconnect() {
+    this.client?.release();
     await this.pool.end();
   }
 }
